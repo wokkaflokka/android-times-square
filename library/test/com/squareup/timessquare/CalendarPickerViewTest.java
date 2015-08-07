@@ -2,6 +2,7 @@
 package com.squareup.timessquare;
 
 import android.app.Activity;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -416,7 +417,7 @@ public class CalendarPickerViewTest {
     jumpToCal.setTime(today.getTime());
     jumpToCal.add(DATE, 1);
     MonthCellDescriptor cellToClick =
-        new MonthCellDescriptor(jumpToCal.getTime(), true, true, true, true, true, 0,
+        new MonthCellDescriptor(jumpToCal.getTime(), true, true, true, true, true, true, 0,
             MonthCellDescriptor.RangeState.NONE);
     view.listener.handleClick(cellToClick);
 
@@ -562,10 +563,19 @@ public class CalendarPickerViewTest {
     TextView firstDay = (TextView) header.getChildAt(0);
     assertThat(firstDay).hasTextString("ש"); // Last day of the week (Saturday) is the first cell.
     CalendarRowView firstWeek = (CalendarRowView) monthView.grid.getChildAt(1);
-    TextView firstDate = (TextView) firstWeek.getChildAt(0);
+    TextView firstDate, secondDate;
+    if (firstWeek.getChildAt(0) instanceof FrameLayout) {
+      firstDate = (TextView) ((FrameLayout)firstWeek.getChildAt(0)).findViewById(R.id.cell_view);
+    } else {
+      firstDate = (TextView) firstWeek.getChildAt(0);
+    }
     assertThat(firstDate).hasTextString("1");
     CalendarRowView secondWeek = (CalendarRowView) monthView.grid.getChildAt(2);
-    TextView secondDate = (TextView) secondWeek.getChildAt(6);
+    if (secondWeek.getChildAt(0) instanceof FrameLayout) {
+      secondDate = (TextView) ((FrameLayout)secondWeek.getChildAt(6)).findViewById(R.id.cell_view);
+    } else {
+      secondDate = (TextView) secondWeek.getChildAt(6);
+    }
     assertThat(secondDate).hasTextString("2");
     assertThat(monthView.title).hasTextString("דצמבר 2012");
   }
@@ -597,7 +607,7 @@ public class CalendarPickerViewTest {
     assertThat(cal.getFirstDayOfWeek()).isEqualTo(Calendar.MONDAY);
 
     view.init(minDate, maxDate, Locale.getDefault()) //
-        .setShortWeekdays(capitalDays);
+            .setShortWeekdays(capitalDays);
     MonthView monthView = (MonthView) view.getAdapter().getView(1, null, null);
     CalendarRowView header = (CalendarRowView) monthView.grid.getChildAt(0);
     TextView firstDay = (TextView) header.getChildAt(0);
@@ -613,7 +623,8 @@ public class CalendarPickerViewTest {
     view.setCellClickInterceptor(new CalendarPickerView.CellClickInterceptor() {
       Calendar cal = Calendar.getInstance(locale);
 
-      @Override public boolean onCellClicked(Date date) {
+      @Override
+      public boolean onCellClicked(Date date) {
         cal.setTime(date);
         return cal.get(MONTH) == NOVEMBER && cal.get(DAY_OF_MONTH) == 18;
       }
@@ -622,14 +633,14 @@ public class CalendarPickerViewTest {
     jumpToCal.setTime(today.getTime());
     jumpToCal.set(DAY_OF_MONTH, 17);
     MonthCellDescriptor cellToClick =
-        new MonthCellDescriptor(jumpToCal.getTime(), true, true, true, true, true, 0,
+        new MonthCellDescriptor(jumpToCal.getTime(), true, true, true, true, true, true, 0,
             MonthCellDescriptor.RangeState.NONE);
     view.listener.handleClick(cellToClick);
 
     assertThat(view.selectedCals.get(0).get(DATE)).isEqualTo(17);
 
     jumpToCal.set(DAY_OF_MONTH, 18);
-    cellToClick = new MonthCellDescriptor(jumpToCal.getTime(), true, true, true, true, true, 0,
+    cellToClick = new MonthCellDescriptor(jumpToCal.getTime(), true, true, true, true, true, true, 0,
         MonthCellDescriptor.RangeState.NONE);
     view.listener.handleClick(cellToClick);
 

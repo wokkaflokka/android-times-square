@@ -93,7 +93,7 @@ public class CalendarPickerView extends ListView {
   private OnInvalidDateSelectedListener invalidDateListener =
       new DefaultOnInvalidDateSelectedListener();
   private CellClickInterceptor cellClickInterceptor;
-  private List<CalendarCellDecorator> decorators;
+  private List<CalendarCellDecorator> decorators = new ArrayList<CalendarCellDecorator>();
 
   public void setDecorators(List<CalendarCellDecorator> decorators) {
     this.decorators = decorators;
@@ -204,6 +204,8 @@ public class CalendarPickerView extends ListView {
     // Clear previous state.
     cells.clear();
     months.clear();
+    decorators.clear();
+
     minCal.setTime(minDate);
     maxCal.setTime(maxDate);
     setMidnight(minCal);
@@ -789,8 +791,8 @@ public class CalendarPickerView extends ListView {
         Date date = cal.getTime();
         boolean isCurrentMonth = cal.get(MONTH) == month.getMonth();
         boolean isSelected = isCurrentMonth && containsDate(selectedCals, cal);
-        boolean isSelectable =
-            isCurrentMonth && betweenDates(cal, minCal, maxCal) && isDateSelectable(date);
+        boolean isDecoratable = isCurrentMonth && betweenDates(cal, minCal, maxCal);
+        boolean isSelectable = isDecoratable && isDateSelectable(date);
         boolean isToday = sameDate(cal, today);
         boolean isHighlighted = containsDate(highlightedCals, cal);
         int value = cal.get(DAY_OF_MONTH);
@@ -807,8 +809,8 @@ public class CalendarPickerView extends ListView {
         }
 
         weekCells.add(
-            new MonthCellDescriptor(date, isCurrentMonth, isSelectable, isSelected, isToday,
-                isHighlighted, value, rangeState));
+            new MonthCellDescriptor(date, isCurrentMonth, isSelectable, isDecoratable, isSelected,
+                    isToday, isHighlighted, value, rangeState));
         cal.add(DATE, 1);
       }
     }

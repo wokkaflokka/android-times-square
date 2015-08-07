@@ -6,11 +6,14 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Locale;
 
 public class MonthView extends LinearLayout {
@@ -109,7 +112,10 @@ public class MonthView extends LinearLayout {
         List<MonthCellDescriptor> week = cells.get(i);
         for (int c = 0; c < week.size(); c++) {
           MonthCellDescriptor cell = week.get(isRtl ? 6 - c : c);
-          CalendarCellView cellView = (CalendarCellView) weekRow.getChildAt(c);
+          FrameLayout child = (FrameLayout) weekRow.getChildAt(c);
+          child.setTag(cell);
+
+          CalendarCellView cellView = (CalendarCellView) child.findViewById(R.id.cell_view);
 
           String cellDate = Integer.toString(cell.getValue());
           if (!cellView.getText().equals(cellDate)) {
@@ -127,9 +133,9 @@ public class MonthView extends LinearLayout {
           cellView.setTag(cell);
 
           if (null != decorators) {
-            for (CalendarCellDecorator decorator : decorators) {
-              decorator.decorate(cellView, cell.getDate());
-            }
+            CellDecorationView decoratorFrame = (CellDecorationView) child
+                    .findViewById(R.id.decorator_frame);
+            initDecorators(cell, decoratorFrame);
           }
         }
       } else {
@@ -173,5 +179,32 @@ public class MonthView extends LinearLayout {
 
   public interface Listener {
     void handleClick(MonthCellDescriptor cell);
+  }
+
+  //TODO: make this more efficient
+  private void initDecorators(MonthCellDescriptor cell, CellDecorationView decoratorFrame) {
+    // reset the cell decorators
+    cell.setDecorators(null);
+    decoratorFrame.clearDecorators();
+
+    List<CalendarCellDecorator> newDecorators = new LinkedList<CalendarCellDecorator>();
+    for (CalendarCellDecorator decorator : decorators) {
+      // only apply decorators to "active" days
+      if (cell.isDecoratable() && isSameDay(decorator.getDecoratedDay(), cell.getDate())) {
+        decoratorFrame.addDecorator(decorator);
+        newDecorators.add(decorator);
+      }
+    }
+
+    cell.setDecorators(newDecorators);
+  }
+
+  private boolean isSameDay(Date first, Date second) {
+    Calendar cal1 = Calendar.getInstance();
+    Calendar cal2 = Calendar.getInstance();
+    cal1.setTime(first);
+    cal2.setTime(second);
+    return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+            && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
   }
 }

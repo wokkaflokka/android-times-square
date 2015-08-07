@@ -7,6 +7,7 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import static android.view.View.MeasureSpec.AT_MOST;
@@ -23,7 +24,11 @@ public class CalendarRowView extends ViewGroup implements View.OnClickListener {
   }
 
   @Override public void addView(View child, int index, ViewGroup.LayoutParams params) {
-    child.setOnClickListener(this);
+    if (child instanceof FrameLayout) {
+      ((FrameLayout) child).findViewById(R.id.cell_view).setOnClickListener(this);
+    } else {
+      child.setOnClickListener(this);
+    }
     super.addView(child, index, params);
   }
 
@@ -71,7 +76,11 @@ public class CalendarRowView extends ViewGroup implements View.OnClickListener {
   @Override public void onClick(View v) {
     // Header rows don't have a click listener
     if (listener != null) {
-      listener.handleClick((MonthCellDescriptor) v.getTag());
+      if (v instanceof FrameLayout) {
+        listener.handleClick((MonthCellDescriptor) v.findViewById(R.id.cell_view).getTag());
+      } else {
+        listener.handleClick((MonthCellDescriptor) v.getTag());
+      }
     }
   }
 
@@ -81,25 +90,46 @@ public class CalendarRowView extends ViewGroup implements View.OnClickListener {
 
   public void setCellBackground(int resId) {
     for (int i = 0; i < getChildCount(); i++) {
-      getChildAt(i).setBackgroundResource(resId);
+      View child = getChildAt(i);
+      if (child instanceof ViewGroup) {
+        ((TextView) ((ViewGroup) getChildAt(i)).findViewById(R.id.cell_view))
+                .setBackgroundResource(resId);
+      } else {
+        ((TextView) getChildAt(i)).setBackgroundResource(resId);
+      }
     }
   }
 
   public void setCellTextColor(int resId) {
     for (int i = 0; i < getChildCount(); i++) {
-      ((TextView) getChildAt(i)).setTextColor(resId);
+      View child = getChildAt(i);
+      if (child instanceof ViewGroup) {
+        ((TextView) ((ViewGroup) getChildAt(i)).findViewById(R.id.cell_view)).setTextColor(resId);
+      } else {
+        ((TextView) getChildAt(i)).setTextColor(resId);
+      }
     }
   }
 
   public void setCellTextColor(ColorStateList colors) {
     for (int i = 0; i < getChildCount(); i++) {
-      ((TextView) getChildAt(i)).setTextColor(colors);
+      View child = getChildAt(i);
+      if (child instanceof ViewGroup) {
+        ((TextView) ((ViewGroup) getChildAt(i)).findViewById(R.id.cell_view)).setTextColor(colors);
+      } else {
+        ((TextView) getChildAt(i)).setTextColor(colors);
+      }
     }
   }
 
   public void setTypeface(Typeface typeface) {
     for (int i = 0; i < getChildCount(); i++) {
-      ((TextView) getChildAt(i)).setTypeface(typeface);
+      View child = getChildAt(i);
+      if (child instanceof ViewGroup) {
+        ((TextView) ((ViewGroup) getChildAt(i)).findViewById(R.id.cell_view)).setTypeface(typeface);
+      } else {
+        ((TextView) getChildAt(i)).setTypeface(typeface);
+      }
     }
   }
 }

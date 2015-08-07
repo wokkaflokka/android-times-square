@@ -3,6 +3,7 @@
 package com.squareup.timessquare;
 
 import java.util.Date;
+import java.util.List;
 
 /** Describes the state of a particular date cell in a {@link MonthView}. */
 class MonthCellDescriptor {
@@ -16,14 +17,18 @@ class MonthCellDescriptor {
   private boolean isSelected;
   private final boolean isToday;
   private final boolean isSelectable;
+  private final boolean isDecoratable;
   private boolean isHighlighted;
   private RangeState rangeState;
+  private List<CalendarCellDecorator> decorators;
 
-  MonthCellDescriptor(Date date, boolean currentMonth, boolean selectable, boolean selected,
-      boolean today, boolean highlighted, int value, RangeState rangeState) {
+
+  MonthCellDescriptor(Date date, boolean currentMonth, boolean selectable, boolean decoratable,
+      boolean selected, boolean today, boolean highlighted, int value, RangeState rangeState) {
     this.date = date;
     isCurrentMonth = currentMonth;
     isSelectable = selectable;
+    isDecoratable = decoratable;
     isHighlighted = highlighted;
     isSelected = selected;
     isToday = today;
@@ -45,6 +50,10 @@ class MonthCellDescriptor {
 
   public boolean isSelected() {
     return isSelected;
+  }
+
+  public boolean isDecoratable() {
+      return isDecoratable;
   }
 
   public void setSelected(boolean selected) {
@@ -73,6 +82,14 @@ class MonthCellDescriptor {
 
   public int getValue() {
     return value;
+  }
+
+  public List<CalendarCellDecorator> getDecorators() {
+      return decorators;
+  }
+
+  public void setDecorators(List<CalendarCellDecorator> decorators) {
+      this.decorators = decorators;
   }
 
   @Override public String toString() {
